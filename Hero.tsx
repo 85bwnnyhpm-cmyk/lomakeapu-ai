@@ -1,64 +1,29 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<string | null>;
-  signUp: (email: string, password: string) => Promise<string | null>;
-  signOut: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      (async () => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      })();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  async function signIn(email: string, password: string): Promise<string | null> {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return error?.message ?? null;
-  }
-
-  async function signUp(email: string, password: string): Promise<string | null> {
-    const { error } = await supabase.auth.signUp({ email, password });
-    return error?.message ?? null;
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut();
-  }
-
+export default function Footer() {
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+    <footer className="border-t border-brand-border bg-white">
+      <div className="w-full max-w-[1120px] mx-auto px-5 py-10">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <div className="font-extrabold text-brand-text text-lg">LomakeApu AI</div>
+            <p className="text-sm text-brand-muted mt-1 max-w-sm">
+              Viralliset paperit selkosuomeksi. Tekoälyavusteista apua jokapäiväiseen elämään.
+            </p>
+          </div>
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-brand-muted">
+            <a href="#toimii" className="hover:text-primary-600 transition-colors">Miten toimii</a>
+            <a href="#hinnat" className="hover:text-primary-600 transition-colors">Hinnat</a>
+            <a href="#luottamus" className="hover:text-primary-600 transition-colors">Tietoturva</a>
+            <a href="#" className="hover:text-primary-600 transition-colors">Tietosuoja</a>
+            <a href="#" className="hover:text-primary-600 transition-colors">Yhteystiedot</a>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-brand-border flex flex-col sm:flex-row justify-between gap-3 text-xs text-brand-muted">
+          <span>© {new Date().getFullYear()} LomakeApu AI. Kaikki oikeudet pidätetään.</span>
+          <span>Tehty Suomessa 🇫🇮</span>
+        </div>
+      </div>
+    </footer>
+  );
 }

@@ -1,60 +1,90 @@
-import { ShieldCheck, Lock, Eye, FileCheck2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 
-const items = [
-  {
-    icon: Lock,
-    title: 'Salattu yhteys',
-    desc: 'Kaikki data kulkee TLS-salattua yhteyttä pitkin. Kukaan ulkopuolinen ei näe asiakirjojasi.',
-  },
-  {
-    icon: Eye,
-    title: 'Ei koulutusta tiedoillasi',
-    desc: 'Asiakirjojasi ei käytetä tekoälymallien koulutukseen. Ne pysyvät sinun.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'GDPR-noudattaminen',
-    desc: 'Toimimme EU:n tietosuoja-asetuksen mukaisesti. Tietosi käsitellään Suomessa.',
-  },
-  {
-    icon: FileCheck2,
-    title: 'Vastuu selkeä',
-    desc: 'Tekoäly ehdottaa, mutta päätös on aina sinun. Emme anna virallista neuvontaa.',
-  },
+const navLinks = [
+  { href: '#toimii', label: 'Miten toimii' },
+  { href: '#kenelle', label: 'Kenelle' },
+  { href: '#hinnat', label: 'Hinnat' },
+  { href: '#luottamus', label: 'Luottamus' },
 ];
 
-export default function Trust() {
-  return (
-    <section id="luottamus" className="py-16 md:py-24 bg-brand-bg">
-      <div className="w-full max-w-[1120px] mx-auto px-5">
-        <div className="text-center mb-12">
-          <span className="text-primary-600 font-semibold text-sm">Luottamus</span>
-          <h2 className="text-2xl md:text-[2rem] font-extrabold text-brand-text mt-2">
-            Tietosi ovat sinun
-          </h2>
-          <p className="text-brand-muted mt-3 max-w-2xl mx-auto">
-            Viralliset asiakirjat ovat arkaluontoisia. Siksi tietoturva on kaiken perusta.
-          </p>
-        </div>
+export default function Header({ onGetStarted }: { onGetStarted: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {items.map((it) => {
-            const Icon = it.icon;
-            return (
-              <div
-                key={it.title}
-                className="rounded-card bg-white border border-brand-border p-6 shadow-card hover:border-primary-200 transition-all duration-200"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary-50 flex items-center justify-center mb-4">
-                  <Icon size={20} className="text-primary-600" />
-                </div>
-                <h3 className="text-base font-bold text-brand-text mb-1.5">{it.title}</h3>
-                <p className="text-sm text-brand-muted leading-relaxed">{it.desc}</p>
-              </div>
-            );
-          })}
-        </div>
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`sticky top-0 z-30 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/90 backdrop-blur-md border-b border-brand-border/90 shadow-sm'
+          : 'bg-white/70 backdrop-blur-sm border-b border-transparent'
+      }`}
+    >
+      <div className="w-full max-w-[1120px] mx-auto px-5 flex items-center justify-between h-16 gap-5">
+        <a
+          href="#top"
+          className="font-extrabold text-[1.1rem] tracking-tight text-brand-text select-none"
+        >
+          LomakeApu AI
+        </a>
+
+        <nav className="hidden md:flex gap-6 text-[0.95rem] text-brand-muted">
+          {navLinks.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              className="hover:text-primary-600 transition-colors duration-150"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        <button
+          onClick={onGetStarted}
+          className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-full font-bold text-[0.9rem] bg-white border border-brand-border text-brand-text hover:border-primary-600 hover:text-primary-600 transition-all duration-150"
+        >
+          Aloita
+        </button>
+
+        <button
+          className="md:hidden text-brand-muted hover:text-brand-text transition-colors"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Avaa valikko"
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
-    </section>
+
+      {menuOpen && (
+        <div className="md:hidden bg-white border-b border-brand-border px-5 pb-4 flex flex-col gap-3">
+          {navLinks.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setMenuOpen(false)}
+              className="text-brand-muted hover:text-primary-600 text-[0.97rem] py-1 transition-colors"
+            >
+              {l.label}
+            </a>
+          ))}
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              onGetStarted();
+            }}
+            className="mt-1 text-center px-5 py-2.5 rounded-full font-bold text-[0.9rem] bg-primary-600 text-white"
+          >
+            Aloita
+          </button>
+        </div>
+      )}
+    </header>
   );
 }
